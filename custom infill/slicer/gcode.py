@@ -19,6 +19,7 @@ class GCodeWriter:
         self.z: Optional[float] = None
         self.retracted = False
         self._layer_index = -1
+        self._type: Optional[str] = None
 
     # -- low level -----------------------------------------------------
     def comment(self, text: str):
@@ -98,11 +99,29 @@ class GCodeWriter:
             self.extrude_to(*pts[0])
 
     # -- layers / setup ------------------------------------------------
+    def set_type(self, role: str):
+        """Tag the extrusion role of the moves that follow.
+
+        G-code viewers build their layer list from extrusion moves that carry
+        a known role, width and height. Without these tags every move looks
+        like unknown custom G-code with no width, no layer is registered, and
+        the viewer renders the whole print as a single unscrollable blob.
+        """
+        if role == self._type:
+            return
+        self._type = role
+        self.raw(f";TYPE:{role}")
+        self.raw(f";WIDTH:{self.cfg.extrusion_width:.4f}")
+
     def start_layer(self, layer_index: int, z: float):
         self._layer_index = layer_index
-        self.comment(f"LAYER:{layer_index} Z:{z:.3f}")
+        self._type = None                  # re-tag the role after every change
+        self.raw(";LAYER_CHANGE")
+        self.raw(f";Z:{z:.3f}")
+        self.raw(f";HEIGHT:{self.cfg.layer_height:.3f}")
+        self.comment(f"LAYER:{layer_index}")
         z_speed = self.cfg.travel_speed
-        self.lines.append(f"G0 F{z_speed * 60:.0f} Z{z:.4f}")
+        self.lines.append(f"G1 F{z_speed * 60:.0f} Z{z:.4f}")
         self.z = z
 
     def header(self):
@@ -122,11 +141,13 @@ class GCodeWriter:
         self.raw(f"M104 S{cfg.nozzle_temp:.1f} ; set nozzle temp, don't wait")
         self.raw(f"M190 S{cfg.bed_temp:.1f} ; wait for bed temp")
         self.raw(f"M109 S{cfg.nozzle_temp:.1f} ; wait for nozzle temp")
+        self.raw(";TYPE:Custom")
         self.raw("G28 ; home all axes")
         self.raw("G92 E0 ; reset extruder position")
 
     def footer(self):
         cfg = self.cfg
+        self.raw(";TYPE:Custom")
         self.comment("End of print")
         self.retract()
         self.raw(f"M104 S0 ; nozzle heater off")

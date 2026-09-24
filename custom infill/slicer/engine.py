@@ -58,6 +58,7 @@ def slice_stl_to_gcode(
             polygon, config.extrusion_width, config.num_perimeters
         )
         for loop in perimeter_loops:
+            writer.set_type("Perimeter")
             writer.print_polyline(loop, closed=True)
 
         infill_region = compute_infill_region(
@@ -74,6 +75,8 @@ def slice_stl_to_gcode(
             pattern=infill_pattern,
             angle_deg=angle,
         )
+        if infill_lines:
+            writer.set_type("Internal infill")
         for line in infill_lines:
             writer.print_polyline(line, closed=False)
 
