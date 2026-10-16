@@ -64,16 +64,11 @@ def slice_stl_to_gcode(
         infill_region = compute_infill_region(
             polygon, config.extrusion_width, config.num_perimeters
         )
-        angle = config.infill_angle
-        if config.alternate_infill_angle and (i % 2 == 1):
-            angle += 90.0
-
         infill_lines = generate_infill(
             infill_region,
             config.extrusion_width,
             config.infill_density,
             pattern=infill_pattern,
-            angle_deg=angle,
         )
         if infill_lines:
             writer.set_type("Internal infill")

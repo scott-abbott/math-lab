@@ -55,11 +55,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
                       help="number of perimeter shells (default: 2)")
     geo.add_argument("--infill-density", type=float, default=0.2,
                       help="0.0-1.0 (default: 0.2)")
-    geo.add_argument("--infill-angle", type=float, default=45.0,
-                      help="base infill direction in degrees (default: 45)")
-    geo.add_argument("--no-alternate-infill-angle", action="store_false",
-                      dest="alternate_infill_angle",
-                      help="don't rotate infill 90 degrees every other layer")
 
     hw = p.add_argument_group("Hardware")
     hw.add_argument("--nozzle-diameter", type=float, default=0.4, help="mm (default: 0.4)")
@@ -118,8 +113,6 @@ def main(argv=None):
         bed_size_y=args.bed_size_y,
         center_x=args.center_x,
         center_y=args.center_y,
-        infill_angle=args.infill_angle,
-        alternate_infill_angle=args.alternate_infill_angle,
     )
 
     if args.infill_pattern_file:

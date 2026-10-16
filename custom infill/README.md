@@ -39,7 +39,7 @@ FunctionPattern(gen)                                     # gen(ctx) -> [path, ..
 ```
 
 Patterns are evaluated in a **part-local frame** — `(0, 0)` is the middle
-of the model's footprint, `+x` runs along `infill_angle` — so `r(theta)`
+of the model's footprint, `+x` runs along the bed X axis — so `r(theta)`
 spirals out from the part's center and moving the model around the bed
 no longer changes its infill.
 
@@ -112,9 +112,8 @@ python main.py part.stl part.gcode \
 
 Infill line spacing is derived from `extrusion_width / infill_density`;
 the pattern function only controls the shape each line traces as it
-sweeps across x, in a frame rotated to `--infill-angle` (alternating
-+90 degrees every other layer by default, `--no-alternate-infill-angle`
-to disable).
+sweeps across x. Infill is never rotated: lines always run along the bed
+X axis, on every layer.
 
 ## What it does / doesn't do
 

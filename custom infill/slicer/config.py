@@ -37,10 +37,6 @@ class PrintConfig:
     center_x: Optional[float] = None
     center_y: Optional[float] = None
 
-    # --- Infill ---
-    infill_angle: float = 45.0         # degrees, base direction of infill lines
-    alternate_infill_angle: bool = True  # rotate 90 deg every other layer
-
     def __post_init__(self):
         if self.layer_height <= 0:
             raise ValueError("layer_height must be > 0")
