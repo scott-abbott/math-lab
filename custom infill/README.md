@@ -50,7 +50,31 @@ pattern has a fill strategy: `"once"` (draw as written, e.g. a spiral),
 star-shaped curve; tile self-intersecting ones instead.
 
 Ready-made: `lines`, `sine`, `zigzag`, `square`, `concentric`, `rose`,
-`star`, `spiral`, `lissajous`, `hexagon`, `epicycloid`.
+`star`, `spiral`, `lissajous`, `hexagon`, `epicycloid`, `hilbert`,
+`gyroid`, `gyroid_approx`.
+
+### Gyroid
+
+```python
+gyroid_pattern("true")      # exact zero contour of the gyroid at each layer's z
+gyroid_pattern("approx")    # pure sine-wave approximation, closed form
+gyroid_pattern("true", period=6.0)   # set the cell length in mm, ignore density
+```
+
+A gyroid is the 3-D surface `sin x cos y + sin y cos z + sin z cos x = 0`;
+each layer's infill is that surface cut by the plane `z = const`, so the
+infill changes from layer to layer and joins up into one continuous
+surface. `"true"` finds the contour with marching squares and refines every
+vertex onto the surface with Newton steps (worst `|F|` ~ 1e-15).
+`"approx"` draws closed-form sine waves instead: ~0.9% of a period mean
+error against the true contour over a full cycle, up to ~11-14% right at
+the 45 degree point where it switches sweep direction.
+
+Density holds on average: the cell length is `K * extrusion_width /
+infill_density` with `K` measured per mode, so the mean infill length over
+a cycle in z matches straight lines at that density. A single layer can
+sit roughly 10-20% either side, because a gyroid's contour length varies
+with height. The sine approximation varies less.
 
 `InfillContext` carries `layer_index`, `z`, `spacing` and `max_radius`,
 so a pattern can also change as the print gets taller.
